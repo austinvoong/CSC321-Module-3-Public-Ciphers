@@ -1,4 +1,6 @@
 # Diffie-Hellman key exchange
+# TASK 1 MODIFICATION
+
 import hashlib
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad 
