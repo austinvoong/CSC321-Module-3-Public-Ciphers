@@ -1,4 +1,3 @@
-# Diffie-Hellman key exchange
 import hashlib
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
@@ -50,13 +49,10 @@ def sha256_truncate(secret):
 
 
 def encrypt_message(message, key, iv):
-    # Generate a random initialization vector (IV)
+    """Encrypts the message using AES-CBC."""
     cipher = AES.new(key, AES.MODE_CBC, iv)
-    # Hash the message
     padded_message = pad(message.encode('utf-8'), AES.block_size)
-    # Encrypt the padded message
-    encrypted_message = cipher.encrypt(padded_message)
-    return encrypted_message
+    return cipher.encrypt(padded_message)
 
 
 def decrypt_message(encrypted_message, key, iv):
@@ -75,6 +71,7 @@ def main():
     print(f"The value of q: {q}")
     print(f"The value of alpha: {alpha}")
 
+def diffie_hellman_protocol():
     # Alice's private and public keys
     XA = 6  # Alice's private key
     YA = power(alpha, XA, q)  # Alice's public key
@@ -93,8 +90,8 @@ def main():
     # Bob's calculation of the shared secret, uses Alice's public key + her private key to calculate
     K_Bob = power(YA, XB, q)
 
-    print(f"The shared secret key K_Alice: {K_Alice}")
-    print(f"The shared secret key K_Bob: {K_Bob}")
+    # Derive the symmetric key
+    symmetric_key = derive_key(shared_secret_Alice)
 
     # Truncate the shared secret to a 16-byte value
     symmetric_key = sha256_truncate(K_Alice)
