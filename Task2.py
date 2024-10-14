@@ -123,3 +123,6 @@ if __name__ == "__main__":
 
     print("\nSetting alpha to q-1:")
     mitm_generator_attack(q-1)
+
+if __name__ == "__main__":
+    diffie_hellman_protocol()
