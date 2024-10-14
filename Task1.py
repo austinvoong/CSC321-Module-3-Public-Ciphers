@@ -9,20 +9,31 @@ alpha = int("A4D1CBD5C3FD34126765A442EFB99905F8104DD258AC507FD6406CFF14266D31266
 
 def generate_private_key():
     """Generates a random private key for Diffie-Hellman."""
-    return int.from_bytes(os.urandom(16), 'big') % q
+    return int.from_bytes(os.urandom(16), 'big') % q 
+    # os.urandom(16) generates 16 random bytes
+    # int.from_bytes converts the bytes to an integer
+    # % q takes the modulus of the generated integer
+    # the above steps ensures that the private key is within the range [0, q-1] DIF-HEL prot req 
 
 def compute_public_key(private_key, base, mod):
     """Computes the public key using the base and modulus."""
     return pow(base, private_key, mod)
-
+# designed to compute a public key from a given private key
+#  function returns the computed public key, which is an integer. 
+#  This public key can be shared with other 
+#  participants in the protocol to establish a shared secret.
 def compute_shared_secret(public_key, private_key, mod):
     """Computes the shared secret using the other party's public key."""
     return pow(public_key, private_key, mod)
+    # This shared secret is used to derive a symmetric key for encrypting 
+    # and decrypting messages between the two parties.
+    #This shared secret should be the same for both parties
 
 def derive_key(secret):
     """Derives a 16-byte symmetric key from the shared secret using SHA256."""
     return hashlib.sha256(secret.to_bytes(128, 'big')).digest()[:16]
-
+# converts the shared secret into bytes and hashes it using the SHA-256 algorithm
+# resulting hash is 32 bytes long, but only the first 16 bytes are used to form a symmetric key
 def encrypt_message(message, key, iv):
     """Encrypts the message using AES-CBC."""
     cipher = AES.new(key, AES.MODE_CBC, iv)
