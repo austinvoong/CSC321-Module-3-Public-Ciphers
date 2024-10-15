@@ -15,7 +15,7 @@ def generate_private_key():
     # % q takes the modulus of the generated integer
     # the above steps ensures that the private key is within the range [0, q-1] DIF-HEL prot req 
 
-def compute_public_key(private_key, base, mod):
+def compute_public_key(base, private_key, mod):
     """Computes the public key using the base and modulus."""
     return pow(base, private_key, mod)
 # designed to compute a public key from a given private key
@@ -50,36 +50,39 @@ def main():
 
     # Alice's private and public keys
     XA = generate_private_key()
-    YA = compute_public_key(XA, alpha, q)
+    YA = compute_public_key(alpha, XA, q)
     
     # Bob's private and public keys
     XB = generate_private_key()
-    YB = compute_public_key(XB, alpha, q)
+    YB = compute_public_key(alpha, XB, q)
 
-    # Shared secrets, since Mallory made alph = 1, shared secret will always be 1
+    # Shared secrets
     shared_secret_Alice = compute_shared_secret(YB, XA, q)
     shared_secret_Bob = compute_shared_secret(YA, XB, q)
-
-    # Check if shared secrets match
-    assert shared_secret_Alice == shared_secret_Bob, "Shared secrets do not match!"
-
+    
     # Derive the symmetric key
-    symmetric_key = derive_key(shared_secret_Alice)
+    symmetric_key_alice = derive_key(shared_secret_Alice)
+    symmetric_key_bob = derive_key(shared_secret_Bob)
+
+    print(f"Shared secret (Alice): {shared_secret_Alice}")
+
+    # Check if derived symmetric keys match
+    assert symmetric_key_alice == symmetric_key_bob, "Derived symmetric keys do not match!"
 
     # Example message encryption/decryption
     iv = os.urandom(16)  # 16-byte IV
     message_Alice = "This is Alice's message!"
-    encrypted_message_Alice = encrypt_message(message_Alice, symmetric_key, iv)
+    encrypted_message_Alice = encrypt_message(message_Alice, symmetric_key_alice, iv)
     print(f"Encrypted message from Alice: {encrypted_message_Alice.hex()}")
 
-    decrypted_message_Bob = decrypt_message(encrypted_message_Alice, symmetric_key, iv)
+    decrypted_message_Bob = decrypt_message(encrypted_message_Alice, symmetric_key_bob, iv)
     print(f"Decrypted message by Bob: {decrypted_message_Bob}")
 
     message_Bob = "This is Bob's message!"
-    encrypted_message_Bob = encrypt_message(message_Bob, symmetric_key, iv)
+    encrypted_message_Bob = encrypt_message(message_Bob, symmetric_key_bob, iv)
     print(f"Encrypted message from Bob: {encrypted_message_Bob.hex()}")
 
-    decrypted_message_Alice = decrypt_message(encrypted_message_Bob, symmetric_key, iv)
+    decrypted_message_Alice = decrypt_message(encrypted_message_Bob, symmetric_key_alice, iv)
     print(f"Decrypted message by Alice: {decrypted_message_Alice}")
 
     
