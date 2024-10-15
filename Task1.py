@@ -3,7 +3,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import os
 
-# Global parameters (Public values)
+# 1024 bit parameters given in the assgn
 q = int("B10B8F96A080E01DDE92DE5EAE5D54EC52C99FBCFB06A3C69A6A9DCA52D23B616073E28675A23D189838EF1E2EE652C013ECB4AEA906112324975C3CD49B83BFACCBDD7D90C4BD7098488E9C219A73724EFFD6FAE5644738FAA31A4FF55BCCC0A151AF5F0DC8B4BD45BF37DF365C1A65E68CFDA76D4DA708DF1FB2BC2E4A4371", 16)
 alpha = int("A4D1CBD5C3FD34126765A442EFB99905F8104DD258AC507FD6406CFF14266D31266FEA1E5C41564B777E690F5504F213160217B4B01B886A5E91547F9E2749F4D7FBD7D3B9A92EE1909D0D2263F80A76A6A24C087A091F531DBF0A0169B6A28AD662A4D18E73AFA32D779D5918D08BC8858F4DCEF97C2A24855E6EEB22B3B2E5",16)
 
@@ -15,13 +15,14 @@ def generate_private_key():
     # % q takes the modulus of the generated integer
     # the above steps ensures that the private key is within the range [0, q-1] DIF-HEL prot req 
 
-def compute_public_key(base, private_key, mod):
+def compute_public_key(private_key, base, mod):
     """Computes the public key using the base and modulus."""
     return pow(base, private_key, mod)
 # designed to compute a public key from a given private key
 #  function returns the computed public key, which is an integer. 
 #  This public key can be shared with other 
 #  participants in the protocol to establish a shared secret.
+
 def compute_shared_secret(public_key, private_key, mod):
     """Computes the shared secret using the other party's public key."""
     return pow(public_key, private_key, mod)
@@ -46,45 +47,44 @@ def decrypt_message(encrypted_message, key, iv):
     decrypted_padded_message = cipher.decrypt(encrypted_message)
     return unpad(decrypted_padded_message, AES.block_size).decode('utf-8')
 
-def main():
 
-    # Alice's private and public keys
+print("******IMPLEMENT Diffie-Hellman Exchange******")
+
+def task1_asgn3():
+
+    # Alice's keys
     XA = generate_private_key()
-    YA = compute_public_key(alpha, XA, q)
+    YA = compute_public_key(XA, alpha, q)
     
-    # Bob's private and public keys
+    # Bob's  keys
     XB = generate_private_key()
-    YB = compute_public_key(alpha, XB, q)
+    YB = compute_public_key(XB, alpha, q)
 
-    # Shared secrets
+    # Shared secrets mal alph = 1 so shared secret will always be 1
     shared_secret_Alice = compute_shared_secret(YB, XA, q)
     shared_secret_Bob = compute_shared_secret(YA, XB, q)
-    
+
+    assert shared_secret_Alice == shared_secret_Bob, "Shared secrets do not match!"
+
     # Derive the symmetric key
-    symmetric_key_alice = derive_key(shared_secret_Alice)
-    symmetric_key_bob = derive_key(shared_secret_Bob)
+    symmetric_key = derive_key(shared_secret_Alice)
 
-    print(f"Shared secret (Alice): {shared_secret_Alice}")
-
-    # Check if derived symmetric keys match
-    assert symmetric_key_alice == symmetric_key_bob, "Derived symmetric keys do not match!"
-
-    # Example message encryption/decryption
-    iv = os.urandom(16)  # 16-byte IV
+    # exmp mesg encrypt/decrypt
+    iv = os.urandom(16)  
     message_Alice = "This is Alice's message!"
-    encrypted_message_Alice = encrypt_message(message_Alice, symmetric_key_alice, iv)
+    encrypted_message_Alice = encrypt_message(message_Alice, symmetric_key, iv)
     print(f"Encrypted message from Alice: {encrypted_message_Alice.hex()}")
 
-    decrypted_message_Bob = decrypt_message(encrypted_message_Alice, symmetric_key_bob, iv)
+    decrypted_message_Bob = decrypt_message(encrypted_message_Alice, symmetric_key, iv)
     print(f"Decrypted message by Bob: {decrypted_message_Bob}")
-
+    print("\n")
     message_Bob = "This is Bob's message!"
-    encrypted_message_Bob = encrypt_message(message_Bob, symmetric_key_bob, iv)
+    encrypted_message_Bob = encrypt_message(message_Bob, symmetric_key, iv)
     print(f"Encrypted message from Bob: {encrypted_message_Bob.hex()}")
 
-    decrypted_message_Alice = decrypt_message(encrypted_message_Bob, symmetric_key_alice, iv)
+    decrypted_message_Alice = decrypt_message(encrypted_message_Bob, symmetric_key, iv)
     print(f"Decrypted message by Alice: {decrypted_message_Alice}")
 
     
 if __name__ == "__main__":
-    main()
+    task1_asgn3()
