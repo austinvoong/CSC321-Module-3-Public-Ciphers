@@ -1,5 +1,5 @@
 import random
-from Crypto.Util.number import getPrime
+from Crypto.Util.number import getPrime, inverse
 
 # Requirement: Implement modular inverse (using Extended Euclidean Algorithm)
 def mod_inverse(a, m):
@@ -59,24 +59,53 @@ def int_to_string(number):
         hex_string = '0' + hex_string  # Ensure even length
     return bytes.fromhex(hex_string).decode()
 
+# Mallory's Attack
+def mallory_attack(public_key, private_key, original_message):
+    # Encrypt the original message
+    message_int = string_to_int(original_message)
+    ciphertext = encrypt(public_key, message_int)
+
+    print(f"Original ciphertext: {ciphertext}")
+
+    # Mallory chooses k, let's say k = 2
+    k = 2
+    n, e = public_key
+
+    # Mallory creates a new ciphertext by multiplying the original ciphertext by k^e mod n
+    manipulated_ciphertext = (ciphertext * pow(k, e, n)) % n
+
+    print(f"Manipulated ciphertext: {manipulated_ciphertext}")
+
+    # Mallory can now decrypt the manipulated ciphertext to get the new plaintext
+    decrypted_int = decrypt(private_key, manipulated_ciphertext)  # Using Alice's private key to show
+    decrypted_message = int_to_string(decrypted_int)
+    
+    print(f"Decrypted manipulated message: {decrypted_message}")
+
 # Example usage
 def main():
     # Generate RSA keys
     bits = 2048
     public_key, private_key = generate_keypair(bits)
     print(f"Public key: {public_key}")
-    print(f"Private key: {private_key}")
 
-    # Encrypt a message
-    message = "Hello, RSA!"
-    message_int = string_to_int(message)
-    ciphertext = encrypt(public_key, message_int)
-    print(f"Ciphertext: {ciphertext}")
+    #commented out, this was for part1 testing
+    # print(f"Private key: {private_key}")
 
-    # Decrypt the message
-    decrypted_int = decrypt(private_key, ciphertext)
-    decrypted_message = int_to_string(decrypted_int)
-    print(f"Decrypted message: {decrypted_message}")
+    # # Encrypt a message
+    # message = "Hello, RSA!"
+    # print(f"Original message: {message}\n")
+    # message_int = string_to_int(message)
+    # ciphertext = encrypt(public_key, message_int)
+    # print(f"Ciphertext: {ciphertext}\n")
+
+    # # Decrypt the message
+    # decrypted_int = decrypt(private_key, ciphertext)
+    # decrypted_message = int_to_string(decrypted_int)
+    # print(f"Decrypted message: {decrypted_message}\n")
+
+    original_message = "This is a confidential message."
+    mallory_attack(public_key, private_key, original_message)
 
 if __name__ == "__main__":
     main()
