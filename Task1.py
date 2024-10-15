@@ -5,7 +5,7 @@ import os
 
 # Global parameters (Public values)
 q = int("B10B8F96A080E01DDE92DE5EAE5D54EC52C99FBCFB06A3C69A6A9DCA52D23B616073E28675A23D189838EF1E2EE652C013ECB4AEA906112324975C3CD49B83BFACCBDD7D90C4BD7098488E9C219A73724EFFD6FAE5644738FAA31A4FF55BCCC0A151AF5F0DC8B4BD45BF37DF365C1A65E68CFDA76D4DA708DF1FB2BC2E4A4371", 16)
-# alpha = int("A4D1CBD5C3FD34126765A442EFB99905F8104DD258AC507FD6406CFF14266D31266FEA1E5C41564B777E690F5504F213160217B4B01B886A5E91547F9E2749F4D7FBD7D3B9A92EE1909D0D2263F80A76A6A24C087A091F531DBF0A0169B6A28AD662A4D18E73AFA32D779D5918D08BC8858F4DCEF97C2A24855E6EEB22B3B2E5",16)
+alpha = int("A4D1CBD5C3FD34126765A442EFB99905F8104DD258AC507FD6406CFF14266D31266FEA1E5C41564B777E690F5504F213160217B4B01B886A5E91547F9E2749F4D7FBD7D3B9A92EE1909D0D2263F80A76A6A24C087A091F531DBF0A0169B6A28AD662A4D18E73AFA32D779D5918D08BC8858F4DCEF97C2A24855E6EEB22B3B2E5",16)
 
 def generate_private_key():
     """Generates a random private key for Diffie-Hellman."""
@@ -34,6 +34,7 @@ def derive_key(secret):
     return hashlib.sha256(secret.to_bytes(128, 'big')).digest()[:16]
 # converts the shared secret into bytes and hashes it using the SHA-256 algorithm
 # resulting hash is 32 bytes long, but only the first 16 bytes are used to form a symmetric key
+
 def encrypt_message(message, key, iv):
     cipher = AES.new(key, AES.MODE_CBC, iv)
     padded_message = pad(message.encode('utf-8'), AES.block_size)  # Pads the message to fit the block size
@@ -45,9 +46,7 @@ def decrypt_message(encrypted_message, key, iv):
     decrypted_padded_message = cipher.decrypt(encrypted_message)
     return unpad(decrypted_padded_message, AES.block_size).decode('utf-8')
 
-def mitm_generator_attack():
-    # Mallory sets alpha to 1
-    alpha = 1
+def main():
 
     # Alice's private and public keys
     XA = generate_private_key()
@@ -83,10 +82,6 @@ def mitm_generator_attack():
     decrypted_message_Alice = decrypt_message(encrypted_message_Bob, symmetric_key, iv)
     print(f"Decrypted message by Alice: {decrypted_message_Alice}")
 
-    # Mallory intercepts and decrypts the message
-    decrypted_message_Mallory = decrypt_message(encrypted_message_Alice, 1, iv)
-    print(f"Decrypted message by Mallory: {decrypted_message_Mallory}")
-
     
 if __name__ == "__main__":
-    mitm_generator_attack()
+    main()
